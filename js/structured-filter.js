@@ -95,8 +95,8 @@ $.widget( 'evol.structFilter', {
 			that=this,
 			e=this.element,
 			fnLink=function(css, label, hidden){
-				return '<a class="'+css+'"'+(hidden?' style="display:none;"':'')+
-					' href="javascript:void(0)">'+label+'</a>';
+				return '<a class="btn-floating '+css+'"'+(hidden?' style="display:none;"':'')+
+					' href="javascript:void(0)">'+(bLabels? label: '')+'</a>';
 			},
 			h='<div class="evo-searchFilters"></div>'+
 				fnLink('evo-bNew', i18n.bNewCond);
@@ -114,18 +114,14 @@ $.widget( 'evol.structFilter', {
 		}
 		// - button submit
 		if(this.options.submitButton){
-			this._bSubmit=e.find('.evo-bSubmit').button({
-					showLabel: bLabels
-				}).on('click', function(e){
+			this._bSubmit=e.find('.evo-bSubmit').on('click', function(e){
 					that.element.trigger('submit.search');
 				});
 		}
 		// - editor button new
-		this._bNew=e.find('.evo-bNew').button({
-                showLabel: bLabels,
-				icon: 'ui-icon-plusthick',
-                iconPosition: 'end'
-			}).on('click', function(e){
+		this._bNew=e.find('.evo-bNew').append(
+                makeIcon('add')
+			).on('click', function(e){
 				if(that._step<1){
 					that._setEditorField();
 					that._step=1;
@@ -133,11 +129,11 @@ $.widget( 'evol.structFilter', {
 				that._bAdd.find('.ui-button-text').html(i18n.bAddCond);
 			});
 		// - editor button add
-		this._bAdd=e.find('.evo-bAdd').button({
-                showLabel: bLabels,
-				icon: 'ui-icon-check',
-                iconPosition: 'end'
-			}).on('click', function(evt){
+		this._bAdd=e.find('.evo-bAdd').append(
+                makeIcon('check')
+			).on('click', function(evt){
+                if($(this).hasClass('disable'))
+                    return;
 				var data=that._getEditorData();
 				if(that._cFilter){
 					that._enableFilter(data, that.options.highlight);
@@ -147,11 +143,9 @@ $.widget( 'evol.structFilter', {
 				that._removeEditor();
 			});
 		// - editor button cancel
-		this._bDel=e.find('.evo-bDel').button({
-                showLabel: bLabels,
-				icon: 'ui-icon-close',
-                iconPosition: 'end'
-			}).on('click', function(evt){
+		this._bDel=e.find('.evo-bDel').append(
+                makeIcon('close')
+			).on('click', function(evt){
 				that._removeEditor();
 			});
 		this._editor=e.find('.evo-editFilter')
@@ -196,12 +190,12 @@ $.widget( 'evol.structFilter', {
 				valid=that._editor.find('#value').val()!=='' && that._editor.find('#value2').val()!=='';
 			}
 			if(valid){
-				that._bAdd.button('enable');
+				that._bAdd.removeClass('disable');
 				if(evt.which==13){
 					that._bAdd.trigger('click');
 				}
 			}else{
-				that._bAdd.button('disable');
+				that._bAdd.addClass('disable');
 			}
 		}).on('click', '#checkAll', function(){
 			var $this=$(this),
@@ -211,6 +205,7 @@ $.widget( 'evol.structFilter', {
 		this._filters=e.find('.evo-searchFilters').on('click', 'a', function(){
 			that._editFilter($(this));
 		}).on('click', 'a .ui-button-icon', function(evt){
+            if($(this).hasClass('disable'))
 			evt.stopPropagation();
 			var filter=$(this).parent();
 			if(!filter.hasClass('ui-state-disabled')){
@@ -251,12 +246,9 @@ $.widget( 'evol.structFilter', {
 	},
 
 	addCondition: function(filter){
-		var f=$('<a href="javascript:void(0)"><span>'+this._htmlFilter(filter)+'</span></a>')
+		var f=$('<a class="chip" href="javascript:void(0)"><span>'+this._htmlFilter(filter)+'</span></a>')
 			.prependTo(this._filters)
-			.button({
-				icon: 'ui-icon-close',
-                iconPosition: 'end'
-			})
+			.append(makeIcon('close', 'close'))
 			.data('filter', filter)
 			.fadeIn();
 		if(this.options.highlight){
@@ -288,7 +280,7 @@ $.widget( 'evol.structFilter', {
 
 	_enableFilter: function(filter, anim){
 		if(this._cFilter){
-			this._cFilter.button('enable').removeClass('ui-state-hover ui-state-active');
+			this._cFilter.removeClass('disable').removeClass('ui-state-hover ui-state-active');
 			if(anim){
 				this._cFilter.effect('highlight');
 			}
@@ -310,7 +302,7 @@ $.widget( 'evol.structFilter', {
 			fv=filter.value;
 		this._enableFilter(null, false);
 		this._removeEditor();
-		this._cFilter=$filter.button('disable');
+		this._cFilter=$filter.addClass('disable');
 		this._setEditorField(fid);
 		this._setEditorOperator(op);
 		if(op==evoAPI.sBetween || op==evoAPI.sNotBetween){
@@ -335,9 +327,9 @@ $.widget( 'evol.structFilter', {
 					return EvoUI.inputOption(f.id,f.label);
 				});
 				h+='</select>';
-				this._fList=h;
+				this._fList=$(h);
 			}
-			$(this._fList).appendTo(this._editor).focus();
+			$(this._fList).appendTo(this._editor).formSelect().focus();
 		}
 		if(fid){
 			this._field=this._getFieldById(fid);
@@ -356,6 +348,7 @@ $.widget( 'evol.structFilter', {
 		var fType=this._type;
 		if(this._step<2){
 			var h='',
+                h2='',
 				opt=EvoUI.inputOption;
 			switch (fType){
 				case fTypes.list:
@@ -371,41 +364,43 @@ $.widget( 'evol.structFilter', {
 					this._operator=evoAPI.sEqual;
 					break;
 				default:
-					h+='<select id="operator">'+EvoUI.optNull;
+					h2='<select id="operator">'+EvoUI.optNull;
 					switch (fType){
 						case fTypes.date:
 						case fTypes.time:
 							if (fType==fTypes.time){
-								h+=opt(evoAPI.sEqual, i18n.sAt)+
+								h2+=opt(evoAPI.sEqual, i18n.sAt)+
 									opt(evoAPI.sNotEqual, i18n.sNotAt);
 							}else{
-								h+=opt(evoAPI.sEqual, i18n.sOn)+
+								h2+=opt(evoAPI.sEqual, i18n.sOn)+
 									opt(evoAPI.sNotEqual, i18n.sNotOn);
 							}
-							h+=opt(evoAPI.sGreater, i18n.sAfter)+
+							h2+=opt(evoAPI.sGreater, i18n.sAfter)+
 								opt(evoAPI.sSmaller, i18n.sBefore)+
 								opt(evoAPI.sBetween, i18n.sBetween)+
 								opt(evoAPI.sNotBetween, i18n.sNotBetween);
 							break;
 						case fTypes.number:
-							h+=opt(evoAPI.sEqual, i18n.sNumEqual)+
+							h2+=opt(evoAPI.sEqual, i18n.sNumEqual)+
 								opt(evoAPI.sNotEqual, i18n.sNumNotEqual)+
 								opt(evoAPI.sGreater, i18n.sGreater)+
 								opt(evoAPI.sSmaller, i18n.sSmaller);
 							break;
 						default:
-							h+=opt(evoAPI.sEqual, i18n.sEqual)+
+							h2+=opt(evoAPI.sEqual, i18n.sEqual)+
 								opt(evoAPI.sNotEqual, i18n.sNotEqual)+
 								opt(evoAPI.sStart, i18n.sStart)+
 								opt(evoAPI.sContain, i18n.sContain)+
 								opt(evoAPI.sNotContain, i18n.sNotContain)+
 								opt(evoAPI.sFinish, i18n.sFinish);
 					}
-					h+=opt(evoAPI.sIsNull, i18n.sIsNull)+
+					h2=opt(evoAPI.sIsNull, i18n.sIsNull)+
 						opt(evoAPI.sIsNotNull, i18n.sIsNotNull)+
 						'</select>';
 			}
 			this._editor.append(h);
+            if (h2 != '')
+                $(h2).appendTo(this._editor).formSelect();
 		}
 		if(cond && fType!=fTypes.list){
 			this._editor.find('#operator').val(cond);
@@ -426,7 +421,8 @@ $.widget( 'evol.structFilter', {
 				editor.append(EvoUI.inputHidden('value',''));
 			}else{
 				if(this._step<3){
-					var h='';
+					var h='',
+                        h2='';
 					opBetween=(opVal==evoAPI.sBetween || opVal==evoAPI.sNotBetween);
 					switch (fType){
 						case fTypes.bool:
@@ -449,11 +445,11 @@ $.widget( 'evol.structFilter', {
 							h +='</span>';
 							break;
 						case fTypes.listDropdown:
-							h+='<select id="value">'+EvoUI.optNull;
-							h+=fld.list.map(function(item){
+							h2+='<select id="value">'+EvoUI.optNull;
+							h2+=fld.list.map(function(item){
 								return EvoUI.inputOption(item.id, item.label);
 							}).join('');
-							h+='</select>';
+							h2+='</select>';
 							break;
 						case fTypes.date:
 						case fTypes.time:
@@ -471,6 +467,8 @@ $.widget( 'evol.structFilter', {
 							addOK=false;
 					}
 					editor.append(h);
+                    if(h2)
+                        h2.appendTo(editor).formSelect();
 					if(fType==fTypes.date){
 						editor.find('#value,#value2').datepicker({dateFormat:this.options.dateFormat});
 					}
@@ -497,7 +495,10 @@ $.widget( 'evol.structFilter', {
 					addOK=(fType==fTypes.list || fType==fTypes.listDropdown || fType==fTypes.bool);
 				}
 			}
-			this._bAdd.button(addOK?'enable':'disable').show();
+            if (addOK)
+                this._bAdd.removeClass('disable').show();
+            else
+                this._bAdd.addClass('disable').show();
 			this._step=3;
 		}
 	},
@@ -715,3 +716,6 @@ var EvoUI={
 };
 
 })(jQuery);
+function makeIcon(text, classes){
+    return $('<i>').addClass('material-icons ' + classes).text(text);
+}
