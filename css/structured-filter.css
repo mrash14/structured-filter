@@ -30,7 +30,12 @@
 }
 .evo-editFilter {
   vertical-align: middle;
+  white-space: nowrap;
   float: left;
+}
+.evo-editFilter > * {
+  display: inline-block;
+  margin: 0 0 0 5px;
 }
 .evo-editFilter:after {
   clear: left;

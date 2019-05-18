@@ -57,7 +57,10 @@
 		bAddCond:'Add condition',
 		bUpdateCond:'Update condition',
 		bSubmit:'Submit',
-		bCancel:'Cancel'
+		bCancel:'Cancel',
+		lField:'Field',
+		lOperator:'Operator',
+		lValue:'Value'
 	},
 
 	// - list of operators (for conditions)
@@ -94,18 +97,14 @@ $.widget( 'evol.structFilter', {
 		var bLabels=this.options.buttonLabels,
 			that=this,
 			e=this.element,
-			fnLink=function(css, label, hidden){
-				return '<a class="btn-floating '+css+'"'+(hidden?' style="display:none;"':'')+
-					' href="javascript:void(0)">'+(bLabels? label: '')+'</a>';
-			},
 			h='<div class="evo-searchFilters"></div>'+
-				fnLink('evo-bNew', i18n.bNewCond);
+				EvoUI.fnLink('evo-bNew', bLabels? i18n.bNewCond: '');
 		if(this.options.submitButton){
-			h+=fnLink('evo-bSubmit', i18n.bSubmit);
+			h+=EvoUI.fnLink('evo-bSubmit', bLabels? i18n.bSubmit: '');
 		}
 		h+='<div class="evo-editFilter"></div>'+
-				fnLink('evo-bAdd', i18n.bAddCond, true)+
-				fnLink('evo-bDel', i18n.bCancel, true);
+				EvoUI.fnLink('evo-bAdd', bLabels? i18n.bAddCond: '', true)+
+				EvoUI.fnLink('evo-bDel', bLabels? i18n.bCancel: '', true);
 		this._step=0;
 		e.addClass('structFilter ui-widget-content ui-corner-all')
 			.html(h);
@@ -120,7 +119,7 @@ $.widget( 'evol.structFilter', {
 		}
 		// - editor button new
 		this._bNew=e.find('.evo-bNew').append(
-                makeIcon('add')
+				EvoUI.makeIcon('add')
 			).on('click', function(e){
 				if(that._step<1){
 					that._setEditorField();
@@ -130,7 +129,7 @@ $.widget( 'evol.structFilter', {
 			});
 		// - editor button add
 		this._bAdd=e.find('.evo-bAdd').append(
-                makeIcon('check')
+				EvoUI.makeIcon('check')
 			).on('click', function(evt){
                 if($(this).hasClass('disable'))
                     return;
@@ -144,7 +143,7 @@ $.widget( 'evol.structFilter', {
 			});
 		// - editor button cancel
 		this._bDel=e.find('.evo-bDel').append(
-                makeIcon('close')
+				EvoUI.makeIcon('close')
 			).on('click', function(evt){
 				that._removeEditor();
 			});
@@ -248,7 +247,7 @@ $.widget( 'evol.structFilter', {
 	addCondition: function(filter){
 		var f=$('<a class="chip" href="javascript:void(0)"><span>'+this._htmlFilter(filter)+'</span></a>')
 			.prependTo(this._filters)
-			.append(makeIcon('close', 'close'))
+			.append(EvoUI.makeIcon('close', 'close'))
 			.data('filter', filter)
 			.fadeIn();
 		if(this.options.highlight){
@@ -321,20 +320,11 @@ $.widget( 'evol.structFilter', {
 				this._bSubmit.stop().hide();
 			}
 			this._bDel.show();
-			if(!this._fList){
-				var h='<select id="field">'+EvoUI.optNull;
-				h+=this.options.fields.map(function(f){
-					return EvoUI.inputOption(f.id,f.label);
-				});
-				h+='</select>';
-				this._fList=$(h);
-			}
-			$(this._fList).appendTo(this._editor).formSelect().focus();
+			EvoUI.makeSelect("field", this.options.fields, fid, this._editor, i18n.lField);
 		}
 		if(fid){
 			this._field=this._getFieldById(fid);
 			this._type=this._field.type;
-			this._editor.find('#field').val(fid);
 		}
 		this._step=1;
 	},
@@ -347,63 +337,56 @@ $.widget( 'evol.structFilter', {
 		
 		var fType=this._type;
 		if(this._step<2){
-			var h='',
-                h2='',
-				opt=EvoUI.inputOption;
 			switch (fType){
 				case fTypes.list:
 					//h.push(i18n.sInList);
-					h+=EvoUI.inputHidden('operator',evoAPI.sInList);
+					this._editor.append(EvoUI.inputHidden('operator',evoAPI.sInList));
 					this._operator=evoAPI.sInList;
 					break;
 				case fTypes.listOpts:
 				case fTypes.listDropdown:
 				case fTypes.bool:
 					//h.push(i18n.sEqual);
-					h+=EvoUI.inputHidden('operator',evoAPI.sEqual);
+					this._editor.append(EvoUI.inputHidden('operator',evoAPI.sEqual));
 					this._operator=evoAPI.sEqual;
 					break;
 				default:
-					h2='<select id="operator">'+EvoUI.optNull;
+					var opts = [];
 					switch (fType){
 						case fTypes.date:
 						case fTypes.time:
 							if (fType==fTypes.time){
-								h2+=opt(evoAPI.sEqual, i18n.sAt)+
-									opt(evoAPI.sNotEqual, i18n.sNotAt);
+								opts.push({id: evoAPI.sEqual, label: i18n.sAt});
+								opts.push({id: evoAPI.sNotEqual, label: i18n.sNotAt});;
 							}else{
-								h2+=opt(evoAPI.sEqual, i18n.sOn)+
-									opt(evoAPI.sNotEqual, i18n.sNotOn);
+								opts.push({id: evoAPI.sEqual, label: i18n.sOn});
+								opts.push({id: evoAPI.sNotEqual, label: i18n.sNotOn});;
 							}
-							h2+=opt(evoAPI.sGreater, i18n.sAfter)+
-								opt(evoAPI.sSmaller, i18n.sBefore)+
-								opt(evoAPI.sBetween, i18n.sBetween)+
-								opt(evoAPI.sNotBetween, i18n.sNotBetween);
+							opts.push({id: evoAPI.sGreater, label: i18n.sAfter});
+							opts.push({id: evoAPI.sSmaller, label: i18n.sBefore});
+							opts.push({id: evoAPI.sBetween, label: i18n.sBetween});
+							opts.push({id: evoAPI.sNotBetween, label: i18n.sNotBetween});
 							break;
 						case fTypes.number:
-							h2+=opt(evoAPI.sEqual, i18n.sNumEqual)+
-								opt(evoAPI.sNotEqual, i18n.sNumNotEqual)+
-								opt(evoAPI.sGreater, i18n.sGreater)+
-								opt(evoAPI.sSmaller, i18n.sSmaller);
+							opts.push({id: evoAPI.sEqual, label: i18n.sNumEqual});
+							opts.push({id: evoAPI.sNotEqual, label: i18n.sNumNotEqual});
+							opts.push({id: evoAPI.sGreater, label: i18n.sGreater});
+							opts.push({id: evoAPI.sSmaller, label: i18n.sSmaller});
 							break;
 						default:
-							h2+=opt(evoAPI.sEqual, i18n.sEqual)+
-								opt(evoAPI.sNotEqual, i18n.sNotEqual)+
-								opt(evoAPI.sStart, i18n.sStart)+
-								opt(evoAPI.sContain, i18n.sContain)+
-								opt(evoAPI.sNotContain, i18n.sNotContain)+
-								opt(evoAPI.sFinish, i18n.sFinish);
+							opts.push({id: evoAPI.sEqual, label: i18n.sEqual});
+							opts.push({id: evoAPI.sNotEqual, label: i18n.sNotEqual});
+							opts.push({id: evoAPI.sStart, label: i18n.sStart});
+							opts.push({id: evoAPI.sContain, label: i18n.sContain});
+							opts.push({id: evoAPI.sNotContain, label: i18n.sNotContain});
+							opts.push({id: evoAPI.sFinish, label: i18n.sFinish});
 					}
-					h2=opt(evoAPI.sIsNull, i18n.sIsNull)+
-						opt(evoAPI.sIsNotNull, i18n.sIsNotNull)+
-						'</select>';
+					opts.push({id: evoAPI.sIsNull, label: i18n.sIsNull});
+					opts.push({id: evoAPI.sIsNotNull, label: i18n.sIsNotNull});
+					EvoUI.makeSelect("operator", opts, cond, this._editor, i18n.lOperator);
 			}
-			this._editor.append(h);
-            if (h2 != '')
-                $(h2).appendTo(this._editor).formSelect();
 		}
 		if(cond && fType!=fTypes.list){
-			this._editor.find('#operator').val(cond);
 			this._operator=cond;
 		}
 		this._step=2;
@@ -421,54 +404,45 @@ $.widget( 'evol.structFilter', {
 				editor.append(EvoUI.inputHidden('value',''));
 			}else{
 				if(this._step<3){
-					var h='',
-                        h2='';
 					opBetween=(opVal==evoAPI.sBetween || opVal==evoAPI.sNotBetween);
 					switch (fType){
 						case fTypes.bool:
-							h+='<span id="value">'+
-								EvoUI.inputRadio('value', '1', i18n.yes, v!='0', 'value1')+
-								EvoUI.inputRadio('value', '0', i18n.no, v=='0', 'value0')+
-								'</span>';
+							editor.append($('<span id="value">').append(
+								EvoUI.inputRadio('value', '1', i18n.yes, v!='0', 'value1'),
+								EvoUI.inputRadio('value', '0', i18n.no, v=='0', 'value0')));
 							break;
 						case fTypes.list:
-							h+='<span id="value">'+
-								((fld.list.length>7)?'(<input type="checkbox" id="checkAll" value="1"/><label for="checkAll">All</label>) ':'')+
-								EvoUI.inputCheckboxes(fld.list)+
-								'</span>';
+							editor.append($('<span id="value">').append(
+								((fld.list.length>7)?'(<input type="checkbox" id="checkAll" value="1"/><label for="checkAll">All</label>) ':''),
+								EvoUI.inputCheckboxes(fld.list)));
 							break;
 						case fTypes.listOpts:
-							h+='<span id="value">';
+							h='<span id="value">';
 							h+=fld.list.map(function(item){
 								return EvoUI.inputRadio(fld.id, item.id, item.label, v==item.id, 'value' + item.id);
 							}).join('');
 							h +='</span>';
+							editor.append(h);
 							break;
 						case fTypes.listDropdown:
-							h2+='<select id="value">'+EvoUI.optNull;
-							h2+=fld.list.map(function(item){
-								return EvoUI.inputOption(item.id, item.label);
-							}).join('');
-							h2+='</select>';
+							editor.append(EvoUI.makeSelect("value", fld.list, v, editor, i18n.lValue));
 							break;
 						case fTypes.date:
 						case fTypes.time:
 						case fTypes.number:
 							var iType=(fType==fTypes.date)?'text':fType;
-							h+='<input id="value" type="'+iType+'"/>';
+							h='<input id="value" type="'+iType+'"/>';
 							if(opBetween){
 								h+='<span class="as-Txt">'+i18n.opAnd+' </span>'+
 									'<input id="value2" type="'+iType+'"/>';
 							}
+							editor.append(h);
 							addOK=false;
 							break;
 						default:
-							h+='<input id="value" type="text"/>';
+							editor.append('<input id="value" type="text"/>');
 							addOK=false;
 					}
-					editor.append(h);
-                    if(h2)
-                        h2.appendTo(editor).formSelect();
 					if(fType==fTypes.date){
 						editor.find('#value,#value2').datepicker({dateFormat:this.options.dateFormat});
 					}
@@ -711,11 +685,42 @@ var EvoUI={
 			return '<input type="checkbox" id="'+lv.id+'" value="'+lv.id+'"/>'+
 				'<label for="'+lv.id+'">'+lv.label+'</label> ';
 		}).join('');
-	}
+	},
 
+	fnLink: function (css, label, hidden) {
+		return '<a class="btn-floating ' + (css || '') + '"' + (hidden?' style="display:none;"':'') +
+			' href="javascript:void(0)">' + label + '</a>';
+	},
+
+	makeIcon: function (text, classes) {
+		return $('<i>').addClass('material-icons ' + classes).text(text);
+	},
+
+	makeSelect: function (id, options, value, parent, label) {
+		var random = Math.random().toString(36).substring(7),
+			defaultLabel = label,
+			valueLabel = false;
+		var ul = $(`<ul id='dropdown-${random}' class='dropdown-content'>`);
+		for (let opt of options) {
+			ul.append($(`<li><a data-value="${opt.id}" href="#!">${opt.label}</a></li>`));
+			if (value==opt.id)
+				valueLabel = opt.label;
+		}
+		$(`<div id="dropdown-${random}-wrapper">`).addClass('dropdown-wrapper').append(
+			$(`<span class='dropdown-trigger chip' data-target='dropdown-${random}'>`).text(label || ""),
+			ul
+		).appendTo(
+			parent
+		).on('click', 'li a', function(){
+			var wrapper = $(`#dropdown-${random}-wrapper`);
+			wrapper.data('value', $(this).data('value')).trigger('change');
+			if ($(this).data('value'))
+				wrapper.find('.dropdown-trigger').text($(this).text());
+			else
+				wrapper.find('.dropdown-trigger').text(defaultLabel);
+			return false;
+		}).find('.dropdown-trigger').text(valueLabel || defaultLabel).dropdown();
+	}
 };
 
 })(jQuery);
-function makeIcon(text, classes){
-    return $('<i>').addClass('material-icons ' + classes).text(text);
-}
