@@ -5,7 +5,7 @@
 */
 .structFilter {
   min-height: 20px;
-  padding: 6px 1px 1px 6px;
+  padding: 6px 1px 6px 6px;
 }
 .evo-bNew,
 .evo-bAdd,
@@ -20,10 +20,22 @@
 .evo-lLight {
   font-weight: normal;
 }
-.evo-searchFilters a {
-  border-radius: 14px;
-  -moz-border-radius: 14px;
-  -webkit-border-radius: 14px;
+.evo-searchFilters .chip {
+  border-radius: 16px;
+  -moz-border-radius: 16px;
+  -webkit-border-radius: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+  max-width: calc(100% - 5px);
+  position: relative;
+  padding-right: 30px;
+}
+.evo-searchFilters .chip .close {
+  position: absolute;
+  right: 10px;
+  top: 0;
 }
 .evo-searchFilters a span.ui-button-text {
   padding: 4px 33px 4px 12px;
@@ -31,34 +43,46 @@
 .evo-editFilter {
   vertical-align: middle;
   white-space: nowrap;
-  float: left;
+  background-color: #e4e4e4;
+  border-radius: 16px;
+  height: 32px;
+  margin: 0 5px 0 0;
+  display: inline-block;
 }
 .evo-editFilter > * {
   display: inline-block;
-  margin: 0 0 0 5px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(0,0,0,0.6);
+  line-height: 32px;
 }
-.evo-editFilter:after {
-  clear: left;
+.evo-editFilter > :last-child {
+  margin-right: 16px;
+}
+.evo-editFilter .chip {
+  margin: 0;
 }
 .evo-editFilter select,
 .evo-editFilter input {
   margin: 1px 6px 6px 1px;
   font-size: 1.1em;
 }
-.evo-editFilter span#value {
-  margin-right: 5px;
-}
 .evo-editFilter #value input[type="radio"],
 .evo-editFilter #value input[type="checkbox"] {
   margin-left: 5px;
 }
-.evo-editFilter input[type="number"]#value,
-.evo-editFilter input[type="time"]#value,
-.evo-editFilter input[type="time"]#value2 {
-  width: 6em;
-}
-.evo-editFilter input.hasDatepicker {
-  width: 8em;
+.evo-editFilter > input[type="text"],
+.evo-editFilter > input[type="time"],
+.evo-editFilter > input[type="number"] {
+  max-height: 32px;
+  max-width: 8em;
+  margin: 0 16px 0 5px !important;
+  padding: 0;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: middle;
+  box-sizing: border-box;
 }
 .evo-editFilter > input,
 .evo-editFilter > select {
@@ -73,4 +97,23 @@
   -webkit-border-radius: 4px;
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+
+
+
+.structFilter .btn-floating.evol-btn {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 0;
+}
+.structFilter .btn-floating.evol-btn i {
+  line-height: 32px;
+}
+.structFilter .dropdown-trigger.chip i {
+  cursor: pointer;
+  float: right;
+  font-size: 16px;
+  line-height: 32px;
+  padding-left: 8px;
 }

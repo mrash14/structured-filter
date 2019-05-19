@@ -109,7 +109,7 @@ $.widget( 'evol.structFilter', {
 		e.addClass('structFilter ui-widget-content ui-corner-all')
 			.html(h);
 		if(this.options.submitReady){
-			this._hValues=$('<span></span>').appendTo(e);
+			this._hValues=$('<span>').appendTo(e);
 		}
 		// - button submit
 		if(this.options.submitButton){
@@ -148,17 +148,17 @@ $.widget( 'evol.structFilter', {
 				that._removeEditor();
 			});
 		this._editor=e.find('.evo-editFilter')
-		.on('change', '#field', function(evt){
+		.on('change', '.dropdown-field', function(evt){
 			evt.stopPropagation();
 			if(that._step>2){
 				that._editor.find('#value,#value2,.as-Txt').remove();
 			}
 			if(that._step>1){
-				that._editor.find('#operator').remove();
+				that._editor.find('.dropdown-operator').remove();
 				that._bAdd.hide();
 			}
 			that._step=1;
-			var fieldID=$(evt.currentTarget).val();
+			var fieldID=$(evt.currentTarget).data('value');
 			if(fieldID!==''){
 				that._field=that._getFieldById(fieldID);
 				var fType=that._type=that._field.type;
@@ -169,9 +169,9 @@ $.widget( 'evol.structFilter', {
 			}else{
 				that._field=that._type=null;
 			}
-		}).on('change', '#operator', function(evt){
+		}).on('change', '.dropdown-operator', function(evt){
 			evt.stopPropagation();
-			that._operator=$(this).val();
+			that._operator=String($(this).data('value'));
 			if(that._step>2){
 				that._editor.find('#value,#value2,.as-Txt').remove();
 				that._bAdd.hide();
@@ -396,7 +396,7 @@ $.widget( 'evol.structFilter', {
 		var editor=this._editor,
 			fld = this._field,
 			fType=this._type,
-			opVal=editor.find('#operator').val(),
+			opVal=String(editor.find('.dropdown-operator').data('value')),
 			opBetween=false,
 			addOK=true;
 		if(opVal!==''){
@@ -407,9 +407,9 @@ $.widget( 'evol.structFilter', {
 					opBetween=(opVal==evoAPI.sBetween || opVal==evoAPI.sNotBetween);
 					switch (fType){
 						case fTypes.bool:
-							editor.append($('<span id="value">').append(
-								EvoUI.inputRadio('value', '1', i18n.yes, v!='0', 'value1'),
-								EvoUI.inputRadio('value', '0', i18n.no, v=='0', 'value0')));
+							editor.append(
+								EvoUI.inputSwitch('value', v!='0'),
+								);
 							break;
 						case fTypes.list:
 							editor.append($('<span id="value">').append(
@@ -454,8 +454,10 @@ $.widget( 'evol.structFilter', {
 							$value.find('#'+v.split(',').join(',#')).prop('checked', 'checked');
 							break;
 						case fTypes.listOpts:
-						case fTypes.bool:
 							$value.find('#value'+v).prop('checked', 'checked');
+							break;
+						case fTypes.bool:
+							$value.find('#value').prop('checked', v==1);
 							break;
 						default:
 							$value.val(v);
@@ -479,12 +481,12 @@ $.widget( 'evol.structFilter', {
 
 	_getEditorData: function(){
 		var e=this._editor,
-			f=e.find('#field'),
+			f=e.find('.dropdown-field'),
 			v=e.find('#value'),
 			filter={
 				field:{
-					label: f.find('option:selected').text(),
-					value: f.val()
+					label: f.find('b').text(),
+					value: f.data('value')
 				},
 				operator:{},
 				value:{}
@@ -515,7 +517,7 @@ $.widget( 'evol.structFilter', {
 		}else if(this._type==fTypes.bool){
 			op.label=i18n.sEqual;
 			op.value=evoAPI.sEqual;
-			var val=(v.find('#value1').prop('checked'))?1:0;
+			var val=(v.find('input').prop('checked'))?1:0;
 			fv.label=(val==1)?i18n.yes:i18n.no;
 			fv.value=val;
 		}else if(this._type==fTypes.listOpts){
@@ -531,9 +533,9 @@ $.widget( 'evol.structFilter', {
 			fv.label = vval?v.find('option[value='+vval+']').text():i18n.sIsNull;
 			fv.value = v.val();
 		}else{
-			var o=e.find('#operator'),
-				opVal=o.val();
-			op.label=o.find('option:selected').text();
+			var o=e.find('.dropdown-operator'),
+				opVal=String(o.data('value'));
+			op.label=o.find('b').text();
 			op.value=opVal;
 			if(opVal==evoAPI.sIsNull || opVal==evoAPI.sIsNotNull){
 				fv.label=fv.value='';
@@ -670,6 +672,17 @@ var EvoUI={
 			'">'+fLbl+'</label>&nbsp;';
 	},
 
+	inputSwitch: function(id, value) {
+		return $('<div>').addClass("switch").attr('id', id).append(
+			$('<label>').append(
+				i18n.no,
+				$('<input type="checkbox">').prop('checked', value || false),
+				$('<span class="lever">'),
+				i18n.yes
+			)
+		);
+	},
+
 	inputHidden:function(id,val){
 		return '<input type="hidden" name="'+id+'" value="'+val+'"/>';
 	},
@@ -688,12 +701,12 @@ var EvoUI={
 	},
 
 	fnLink: function (css, label, hidden) {
-		return '<a class="btn-floating ' + (css || '') + '"' + (hidden?' style="display:none;"':'') +
+		return '<a class="btn-floating evol-btn ' + (css || '') + '"' + (hidden?' style="display:none;"':'') +
 			' href="javascript:void(0)">' + label + '</a>';
 	},
 
 	makeIcon: function (text, classes) {
-		return $('<i>').addClass('material-icons ' + classes).text(text);
+		return $('<i>').addClass('material-icons ' + (classes || '')).text(text);
 	},
 
 	makeSelect: function (id, options, value, parent, label) {
@@ -706,20 +719,23 @@ var EvoUI={
 			if (value==opt.id)
 				valueLabel = opt.label;
 		}
-		$(`<div id="dropdown-${random}-wrapper">`).addClass('dropdown-wrapper').append(
-			$(`<span class='dropdown-trigger chip' data-target='dropdown-${random}'>`).text(label || ""),
+		$(`<div id="dropdown-${random}-wrapper" class="dropdown-${id}">`).addClass('dropdown-wrapper').append(
+			$(`<span class='dropdown-trigger chip' data-target='dropdown-${random}'>`).append(
+					$('<b>'),
+					EvoUI.makeIcon('expand_more') // expand_more
+				),
 			ul
 		).appendTo(
 			parent
 		).on('click', 'li a', function(){
 			var wrapper = $(`#dropdown-${random}-wrapper`);
 			wrapper.data('value', $(this).data('value')).trigger('change');
-			if ($(this).data('value'))
-				wrapper.find('.dropdown-trigger').text($(this).text());
+			if ($(this).data('value') === undefined)
+				wrapper.find('.dropdown-trigger b').text(defaultLabel);
 			else
-				wrapper.find('.dropdown-trigger').text(defaultLabel);
+				wrapper.find('.dropdown-trigger b').text($(this).text());
 			return false;
-		}).find('.dropdown-trigger').text(valueLabel || defaultLabel).dropdown();
+		}).find('.dropdown-trigger').dropdown().find('b').text(valueLabel || defaultLabel);
 	}
 };
 
