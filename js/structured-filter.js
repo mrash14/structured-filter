@@ -408,7 +408,7 @@ $.widget( 'evol.structFilter', {
 					switch (fType){
 						case fTypes.bool:
 							editor.append(
-								EvoUI.inputSwitch('value', v!='0'),
+								EvoUI.inputSwitch('value', v!='0').focus(),
 								);
 							break;
 						case fTypes.list:
@@ -436,19 +436,19 @@ $.widget( 'evol.structFilter', {
 								h+='<span class="as-Txt">'+i18n.opAnd+' </span>'+
 									'<input id="value2" type="'+iType+'"/>';
 							}
-							editor.append(h);
+							editor.append(h).find('#value').focus();
 							addOK=false;
 							break;
 						default:
-							editor.append('<input id="value" type="text"/>');
+							editor.append('<input id="value" type="text"/>').find('#value').focus();
 							addOK=false;
 					}
 					if(fType==fTypes.date){
-						editor.find('#value,#value2').datepicker({dateFormat:this.options.dateFormat});
+						editor.find('#value,#value2').datepicker({dateFormat:this.options.dateFormat}).focus();
 					}
 				}
 				if(v){
-					var $value=editor.find('#value');
+					var $value=editor.find('#value').focus();
 					switch (fType){
 						case fTypes.list:
 							$value.find('#'+v.split(',').join(',#')).prop('checked', 'checked');
