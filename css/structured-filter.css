@@ -6,6 +6,8 @@
 .structFilter {
   min-height: 20px;
   padding: 6px 1px 6px 6px;
+  border: 1px solid #CCC;
+  border-radius: 5px;
 }
 .evo-bNew,
 .evo-bAdd,
@@ -37,7 +39,7 @@
   right: 10px;
   top: 0;
 }
-.evo-searchFilters a span.ui-button-text {
+.evo-searchFilters a span.button-text {
   padding: 4px 33px 4px 12px;
 }
 .evo-editFilter {
@@ -62,6 +64,9 @@
 }
 .evo-editFilter .chip {
   margin: 0;
+}
+.evo-editFilter .dropdown-wrapper {
+  margin-right: 0;
 }
 .evo-editFilter select,
 .evo-editFilter input {
@@ -113,4 +118,18 @@
   font-size: 16px;
   line-height: 32px;
   padding-left: 8px;
+}
+.structFilter .dropdown-content {
+  width: auto !important;
+}
+.evo-searchFilters .chip.state-hover {
+  background-color: grey;
+}
+.evo-searchFilters .chip.state-active {
+  background-color: #26a69a;
+  color: white;
+}
+.evo-searchFilters .chip.disabled,
+.evo-searchFilters .chip.state-disabled {
+    background-color: red;
 }

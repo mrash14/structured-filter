@@ -6,7 +6,6 @@
     <meta name="keywords" content="jQuery UI widget plugin metadata advanced structured filter query builder editor search form">
 
     <link rel="icon" type="image/png" href="favicon.png" />
-	<link id="jquiCSS" rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.css" type="text/css" media="all">
 
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
@@ -16,7 +15,6 @@
 	<link rel="stylesheet" href="css/structured-filter.css" type="text/css" media="all">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js" type="text/javascript"></script>
-	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" type="text/javascript"></script>
 
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
@@ -48,16 +46,6 @@ Firstname starts with 'A' and Birthday after 1/1/1990 and State in (CA, NY, FL).
     <a href="#" id="delFilter">Remove First Condition</a> -
     <a href="#" id="length">Number of Conditions</a> -
     <a href="#" id="clear">Clear</a>
-</p>
-
-<p class="demo-links">Themes:
-    <a href="#" class="css sel">Base</a> -
-    <a href="#" class="css">UI lightness</a> -
-    <a href="#" class="css">UI darkness</a> -
-    <a href="#" class="css">Redmond</a> -
-    <a href="#" class="css">Start</a> -
-    <a href="#" class="css">Le Frog</a> -
-    <a href="#" class="css">Swanky Purse</a>
 </p>
 
 <div id="evol"></div>
@@ -121,15 +109,6 @@ $(document).ready(function(){
         }
         $('#myFilter').val(v);
     }
-
-    // *****   setup theme links   *****
-    $('.css').click(function(){
-        var theme=this.innerHTML.toLowerCase().replace(' ', '-'),
-            url='http://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/'+theme+'/jquery-ui.css';
-        $('#jquiCSS').attr('href', url);
-        $('.css').removeClass('sel');
-        $(this).addClass('sel');
-    });
 
     // *****   setup structured filter widget   *****
     $('#evol').structFilter({fields:contacts })

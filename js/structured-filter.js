@@ -1,15 +1,13 @@
 ﻿/*!
- * structured-filter 2.0.2
+ * structured-filter 3.0.0
  *
  * (c) 2019 Olivier Giulieri
  *
  * https://github.com/evoluteur/structured-filter
  *
  * Depends:
- *	jquery.ui.core.js
- *	jquery.ui.widget.js
- *	jquery.ui.button.js
- *	jquery.ui.datepicker.js
+ *	jquery.js
+ *	materializecss.js
  */
 
 (function( $, undefined){
@@ -81,8 +79,9 @@
 	},
 	isNotFirefox = navigator.userAgent.toLowerCase().indexOf('firefox')===-1;
 
-$.widget( 'evol.structFilter', {
-
+$.fn.structFilter = function(param, args) {
+	var attribs = {
+		
 	options: {
 		fields: [],
 		dateFormat: 'mm/dd/yy',
@@ -92,7 +91,6 @@ $.widget( 'evol.structFilter', {
 		submitReady: false,
 		disableOperators: false
 	},
-
 	_create: function(){
 		var bLabels=this.options.buttonLabels,
 			that=this,
@@ -106,7 +104,7 @@ $.widget( 'evol.structFilter', {
 				EvoUI.fnLink('evo-bAdd', bLabels? i18n.bAddCond: '', true)+
 				EvoUI.fnLink('evo-bDel', bLabels? i18n.bCancel: '', true);
 		this._step=0;
-		e.addClass('structFilter ui-widget-content ui-corner-all')
+		e.addClass('structFilter')
 			.html(h);
 		if(this.options.submitReady){
 			this._hValues=$('<span>').appendTo(e);
@@ -125,7 +123,7 @@ $.widget( 'evol.structFilter', {
 					that._setEditorField();
 					that._step=1;
 				}
-				that._bAdd.find('.ui-button-text').html(i18n.bAddCond);
+				that._bAdd.find('.button-text').html(i18n.bAddCond);
 			});
 		// - editor button add
 		this._bAdd=e.find('.evo-bAdd').append(
@@ -203,11 +201,11 @@ $.widget( 'evol.structFilter', {
 		});
 		this._filters=e.find('.evo-searchFilters').on('click', 'a', function(){
 			that._editFilter($(this));
-		}).on('click', 'a .ui-button-icon', function(evt){
+		}).on('click', 'a .button-icon', function(evt){
             if($(this).hasClass('disable'))
 			evt.stopPropagation();
 			var filter=$(this).parent();
-			if(!filter.hasClass('ui-state-disabled')){
+			if(!filter.hasClass('state-disabled')){
 				filter.fadeOut('slow',function(){
 					filter.remove();
 					that._triggerChange();
@@ -232,9 +230,9 @@ $.widget( 'evol.structFilter', {
 		this._bAdd.hide();
 		this._bDel.hide();
 		this._enableFilter(null, false);
-		this._bNew.removeClass('ui-state-active').show();
+		this._bNew.removeClass('state-active').show();
 		if(this._bSubmit){
-			this._bSubmit.removeClass('ui-state-active').show();
+			this._bSubmit.removeClass('state-active').show();
 		}
 		if(isNotFirefox){
 			// setting focus w/ ff takes too long
@@ -255,7 +253,7 @@ $.widget( 'evol.structFilter', {
 		}
 		this._triggerChange();
 		if(this._bSubmit){
-			this._bSubmit.removeClass('ui-state-active').show();
+			this._bSubmit.removeClass('state-active').show();
 		}
 		return this;
 	},
@@ -279,7 +277,7 @@ $.widget( 'evol.structFilter', {
 
 	_enableFilter: function(filter, anim){
 		if(this._cFilter){
-			this._cFilter.removeClass('disable').removeClass('ui-state-hover ui-state-active');
+			this._cFilter.removeClass('disable state-hover state-active');
 			if(anim){
 				this._cFilter.effect('highlight');
 			}
@@ -309,7 +307,7 @@ $.widget( 'evol.structFilter', {
 		}else{
 			this._setEditorValue(fv.value);
 		}
-		this._bAdd.find('.ui-button-text').html(i18n.bUpdateCond);
+		this._bAdd.find('.button-text').html(i18n.bUpdateCond);
 		this._step=3;
 	},
 
@@ -647,20 +645,36 @@ $.widget( 'evol.structFilter', {
 		var e=this.element.off();
 		e.find('.evo-bNew,.evo-bAdd,.evo-bDel,.evo-searchFilters').off();
 		this._editor.off();
-		e.clear().removeClass('structFilter ui-widget-content ui-corner-all');
+		e.clear().removeClass('structFilter');
 		$.Widget.prototype.destroy.call(this);
 	}
 
-});
-
-$.widget( 'evol.seti18n', {
-	options: {
-	},
-	_create: function(){
-		i18n = this.options;
+	};
+	if (this instanceof $.fn.structFilter) {
+		for (let key in attribs)
+			if (attribs.hasOwnProperty(key))
+				this[key] = attribs[key];
+		this.element = param;
+		this.options = $.extend(self.options, args);
+		this._create();
+		return this;
 	}
 
-});
+	if (param == undefined){
+		return $(this).data('structFilter');
+	} else if (param instanceof Object){
+		self = new $.fn.structFilter(this, param);
+		$(this).data('structFilter', self);
+		return this;
+	} else {
+		try {
+			self = $(this).data('structFilter');
+			return self[param](args);
+		} catch(err) { return undefined; }
+	}
+
+	return this;
+};
 
 // - helpers to generate HTML
 var EvoUI={
