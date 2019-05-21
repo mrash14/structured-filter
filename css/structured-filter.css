@@ -9,12 +9,15 @@
   border: 1px solid #CCC;
   border-radius: 5px;
 }
-.evo-bNew,
-.evo-bAdd,
-.evo-bDel,
-.evo-bSubmit,
+.evo-btn,
+.evo-bSubmit {
+  margin: 0px 6px 1px 1px;
+}
+.evo-btn.disable {
+  background-color: #CCC;
+}
 .evo-searchFilters a {
-  margin: 1px 6px 6px 1px;
+  margin: 6px 6px 1px 1px;
 }
 .evo-lBold {
   font-weight: bold;
@@ -131,12 +134,12 @@
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 
-.structFilter .btn-floating.evol-btn {
+.structFilter .btn-floating.evo-btn {
   width: 32px;
   height: 32px;
   margin-bottom: 0;
 }
-.structFilter .btn-floating.evol-btn i {
+.structFilter .btn-floating.evo-btn i {
   line-height: 32px;
 }
 .structFilter .dropdown-trigger.chip i {

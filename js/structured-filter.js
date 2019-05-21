@@ -96,14 +96,14 @@ $.fn.structFilter = function(param, args) {
 		var bLabels=this.options.buttonLabels,
 			that=this,
 			e=this.element,
-			h='<div class="evo-searchFilters"></div>'+
-				EvoUI.fnLink('evo-bNew', bLabels? i18n.bNewCond: '');
+			h=EvoUI.fnLink('evo-bNew', bLabels? i18n.bNewCond: '');
 		if(this.options.submitButton){
 			h+=EvoUI.fnLink('evo-bSubmit', bLabels? i18n.bSubmit: '');
 		}
 		h+='<div class="evo-editFilter"></div>'+
 				EvoUI.fnLink('evo-bAdd', bLabels? i18n.bAddCond: '', true)+
-				EvoUI.fnLink('evo-bDel', bLabels? i18n.bCancel: '', true);
+				EvoUI.fnLink('evo-bDel', bLabels? i18n.bCancel: '', true)+
+				'<div class="evo-searchFilters"></div>';
 		this._step=0;
 		e.addClass('structFilter')
 			.html(h);
@@ -246,7 +246,7 @@ $.fn.structFilter = function(param, args) {
 
 	addCondition: function(filter){
 		var f=$('<a class="chip" href="javascript:void(0)"><span>'+this._htmlFilter(filter)+'</span></a>')
-			.prependTo(this._filters)
+			.appendTo(this._filters)
 			.append(EvoUI.makeIcon('close', 'close'))
 			.data('filter', filter)
 			.fadeIn();
@@ -613,8 +613,8 @@ $.fn.structFilter = function(param, args) {
 	valText: function(){
 		// - returns filter "text" value as displayed to the user.
 		var ret=[];
-		this._filters.find('a').each(function(){
-			ret.push(this.text);
+		this._filters.find('a > span').each(function(){
+			ret.push(this.innerText);
 		});
 		return ret.join(' '+i18n.opAnd+' ');
 	},
@@ -741,7 +741,7 @@ var EvoUI={
 	},
 
 	fnLink: function (css, label, hidden) {
-		return '<a class="btn-floating evol-btn ' + (css || '') + '"' + (hidden?' style="display:none;"':'') +
+		return '<a class="btn-floating evo-btn ' + (css || '') + '"' + (hidden?' style="display:none;"':'') +
 			' href="javascript:void(0)">' + label + '</a>';
 	},
 
