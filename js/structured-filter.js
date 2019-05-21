@@ -58,7 +58,8 @@
 		bCancel:'Cancel',
 		lField:'Field',
 		lOperator:'Operator',
-		lValue:'Value'
+		lValue:'Value',
+		lAll:'All'
 	},
 
 	// - list of operators (for conditions)
@@ -84,7 +85,7 @@ $.fn.structFilter = function(param, args) {
 		
 	options: {
 		fields: [],
-		dateFormat: 'mm/dd/yy',
+		dateFormat: 'yyyy/mm/dd',
 		highlight: true,
 		buttonLabels: false,
 		submitButton: false,
@@ -194,10 +195,11 @@ $.fn.structFilter = function(param, args) {
 			}else{
 				that._bAdd.addClass('disable');
 			}
-		}).on('click', '#checkAll', function(){
-			var $this=$(this),
-				vc=$this.prop('checked');
-			allChecks=$this.siblings().prop('checked', vc);
+		}).on('click', '.select-all', function(){
+			var $this = $(this),
+				vc = $this.prop('checked');
+			$this.closest('#value').find('select option').prop('selected', vc);
+			$this.closest('#value').find('select').formSelect('_setValueToInput');
 		});
 		this._filters=e.find('.evo-searchFilters').on('click', 'a', function(){
 			that._editFilter($(this));
@@ -248,9 +250,9 @@ $.fn.structFilter = function(param, args) {
 			.append(EvoUI.makeIcon('close', 'close'))
 			.data('filter', filter)
 			.fadeIn();
-		if(this.options.highlight){
-			f.effect('highlight');
-		}
+		// if(this.options.highlight){
+		// 	f.effect('highlight');
+		// }
 		this._triggerChange();
 		if(this._bSubmit){
 			this._bSubmit.removeClass('state-active').show();
@@ -278,9 +280,9 @@ $.fn.structFilter = function(param, args) {
 	_enableFilter: function(filter, anim){
 		if(this._cFilter){
 			this._cFilter.removeClass('disable state-hover state-active');
-			if(anim){
-				this._cFilter.effect('highlight');
-			}
+			// if(anim){
+			// 	this._cFilter.effect('highlight');
+			// }
 			if(filter){
 				this._cFilter.data('filter', filter)
 					.find(':first-child').html(this._htmlFilter(filter));
@@ -394,6 +396,7 @@ $.fn.structFilter = function(param, args) {
 		var editor=this._editor,
 			fld = this._field,
 			fType=this._type,
+			that=this,
 			opVal=String(editor.find('.dropdown-operator').data('value')),
 			opBetween=false,
 			addOK=true;
@@ -410,9 +413,7 @@ $.fn.structFilter = function(param, args) {
 								);
 							break;
 						case fTypes.list:
-							editor.append($('<span id="value">').append(
-								((fld.list.length>7)?'(<input type="checkbox" id="checkAll" value="1"/><label for="checkAll">All</label>) ':''),
-								EvoUI.inputCheckboxes(fld.list)));
+							EvoUI.multipleSelect(fld.list, v? v.split(','): [], "value", editor);
 							break;
 						case fTypes.listOpts:
 							h='<span id="value">';
@@ -442,14 +443,19 @@ $.fn.structFilter = function(param, args) {
 							addOK=false;
 					}
 					if(fType==fTypes.date){
-						editor.find('#value,#value2').datepicker({dateFormat:this.options.dateFormat}).focus();
+						editor.find('#value,#value2').click(function(){
+							$(this).datepicker({
+								format: that.options.dateFormat,
+								defaultDate: Date($(this).val()? Date.parse($(this).val()): Date.now()),
+								setDefaultDate: true
+							}).datepicker("open");
+						});
 					}
 				}
 				if(v){
 					var $value=editor.find('#value').focus();
 					switch (fType){
 						case fTypes.list:
-							$value.find('#'+v.split(',').join(',#')).prop('checked', 'checked');
 							break;
 						case fTypes.listOpts:
 							$value.find('#value'+v).prop('checked', 'checked');
@@ -492,10 +498,14 @@ $.fn.structFilter = function(param, args) {
 			op=filter.operator,
 			fv=filter.value;
 		if(this._type==fTypes.list){
-			var vs=[], ls=[];
-			v.find('input:checked').not('#checkAll').each(function(){
-				vs.push(this.value);
-				ls.push(this.nextSibling.innerHTML);
+			var vs = [],
+				ls = [],
+				values = v.find('select').val();
+			self._field.list.forEach(value => {
+				if (values.indexOf(value.id) > -1) {
+					vs.push(value.id);
+					ls.push(value.label);
+				}
 			});
 			if(vs.length===0){
 				op.label=i18n.sIsNull;
@@ -655,7 +665,7 @@ $.fn.structFilter = function(param, args) {
 			if (attribs.hasOwnProperty(key))
 				this[key] = attribs[key];
 		this.element = param;
-		this.options = $.extend(self.options, args);
+		this.options = $.extend(this.options, args);
 		this._create();
 		return this;
 	}
@@ -697,21 +707,37 @@ var EvoUI={
 		);
 	},
 
+	inputCheckbox: function(classes, value, label) {
+		return $('<p>').append(
+			$('<label>').append(
+				$('<input>').attr({
+					type: "checkbox", class: classes, value: value}),
+				$('<span>').text(label),
+			)
+		);
+	},
+
 	inputHidden:function(id,val){
 		return '<input type="hidden" name="'+id+'" value="'+val+'"/>';
 	},
 
-	inputOption:function(fID,fV){
-		return '<option value="'+fID+'">'+fV+'</option>';
+	inputOption:function(fID, fV, selected){
+		return $(`<option value="${fID}">${fV}</option>`).prop('selected', selected);
 	},
 
 	optNull:'<option value=""></option>',
 
-	inputCheckboxes:function(fLOV){
-		return fLOV.map(function(lv){
-			return '<input type="checkbox" id="'+lv.id+'" value="'+lv.id+'"/>'+
-				'<label for="'+lv.id+'">'+lv.label+'</label> ';
-		}).join('');
+	multipleSelect:function(options, values, id, parent){
+		var all = "";
+		if (options.length > 7)
+			all = EvoUI.inputCheckbox("select-all", 1, i18n.lAll);
+		var select = $(`<select id="${id}" multiple>`);
+		options.forEach(function(option){
+			select.append(EvoUI.inputOption(option.id, option.label, values.indexOf(option.id)>-1));
+		});
+		select = $(`<div id="value">`).append(all, select).appendTo(parent);
+		select.find('select').formSelect();
+		return select;
 	},
 
 	fnLink: function (css, label, hidden) {
@@ -749,7 +775,9 @@ var EvoUI={
 			else
 				wrapper.find('.dropdown-trigger b').text($(this).text());
 			return false;
-		}).find('.dropdown-trigger').dropdown().find('b').text(valueLabel || defaultLabel);
+		}).data('value', value).find('.dropdown-trigger').dropdown().find('b').text(
+			valueLabel || defaultLabel
+		);
 	}
 };
 

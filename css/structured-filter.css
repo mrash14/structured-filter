@@ -33,6 +33,7 @@
   max-width: calc(100% - 5px);
   position: relative;
   padding-right: 30px;
+  transition: 0.3s background-color;
 }
 .evo-searchFilters .chip .close {
   position: absolute;
@@ -77,9 +78,26 @@
 .evo-editFilter #value input[type="checkbox"] {
   margin-left: 5px;
 }
+.evo-editFilter #value p,
+.evo-editFilter #value .select-wrapper {
+  display: inline-block;
+  margin: 0;
+}
+.evo-editFilter #value p span {
+  padding: 0 5px 0 24px;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+.evo-editFilter .as-Txt {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-left: -11px;
+}
 .evo-editFilter > input[type="text"],
+.evo-editFilter > input[type="number"],
+.evo-editFilter > input[type="date"],
 .evo-editFilter > input[type="time"],
-.evo-editFilter > input[type="number"] {
+.evo-editFilter > input[type="datetime"] {
   max-height: 32px;
   max-width: 8em;
   margin: 0 16px 0 5px !important;
@@ -88,6 +106,15 @@
   overflow: hidden;
   vertical-align: middle;
   box-sizing: border-box;
+}
+.evo-editFilter > input[type="date"],
+.evo-editFilter > input[type="time"],
+.evo-editFilter > input[type="datetime"] {
+  max-width: 6em;
+  text-align: center;
+}
+.evo-editFilter > input[type="datetime"] {
+  max-width: 10em;
 }
 .evo-editFilter > input,
 .evo-editFilter > select {
@@ -122,6 +149,18 @@
 .structFilter .dropdown-content {
   width: auto !important;
 }
+.evo-editFilter .select-wrapper input.select-dropdown {
+  color: rgba(0,0,0,0.6);
+  box-sizing: border-box;
+  line-height: 32px;
+  margin: 0;
+  padding: 0;
+  max-height: 32px;
+  max-width: 16em;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: middle;
+}
 .evo-searchFilters .chip.state-hover {
   background-color: grey;
 }
@@ -129,7 +168,12 @@
   background-color: #26a69a;
   color: white;
 }
-.evo-searchFilters .chip.disabled,
-.evo-searchFilters .chip.state-disabled {
-    background-color: red;
+.evo-searchFilters .chip.disable,
+.evo-searchFilters .chip.state-disable {
+  background-color: #26a69a;
+  color: white;
+}
+.evo-searchFilters .chip:hover {
+  background-color: #CCC;
+  color: black;
 }
