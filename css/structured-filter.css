@@ -16,6 +16,9 @@
 .evo-btn.disable {
   background-color: #CCC;
 }
+.evo-searchFilters {
+  font-size: 0;
+}
 .evo-searchFilters a {
   margin: 6px 6px 1px 1px;
 }
@@ -144,7 +147,6 @@
 }
 .structFilter .dropdown-trigger.chip i {
   cursor: pointer;
-  float: right;
   font-size: 16px;
   line-height: 32px;
   padding-left: 8px;

@@ -771,11 +771,11 @@ var EvoUI={
 			var wrapper = $(`#dropdown-${random}-wrapper`);
 			wrapper.data('value', $(this).data('value')).trigger('change');
 			if ($(this).data('value') === undefined)
-				wrapper.find('.dropdown-trigger b').text(defaultLabel);
+				wrapper.find('.dropdown-trigger b').html(defaultLabel);
 			else
-				wrapper.find('.dropdown-trigger b').text($(this).text());
+				wrapper.find('.dropdown-trigger b').html($(this).html());
 			return false;
-		}).data('value', value).find('.dropdown-trigger').dropdown().find('b').text(
+		}).data('value', value).find('.dropdown-trigger').dropdown().find('b').html(
 			valueLabel || defaultLabel
 		);
 	}
