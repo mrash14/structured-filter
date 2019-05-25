@@ -130,8 +130,8 @@ $.fn.structFilter = function(param, args) {
 		this._bAdd=e.find('.evo-bAdd').append(
 				EvoUI.makeIcon('check')
 			).on('click', function(evt){
-                if($(this).hasClass('disable'))
-                    return;
+				if($(this).hasClass('disable'))
+					return;
 				var data=that._getEditorData();
 				if(that._cFilter){
 					that._enableFilter(data, that.options.highlight);
@@ -204,8 +204,8 @@ $.fn.structFilter = function(param, args) {
 		this._filters=e.find('.evo-searchFilters').on('click', 'a', function(){
 			that._editFilter($(this));
 		}).on('click', 'a .button-icon', function(evt){
-            if($(this).hasClass('disable'))
-			evt.stopPropagation();
+			if($(this).hasClass('disable'))
+				evt.stopPropagation();
 			var filter=$(this).parent();
 			if(!filter.hasClass('state-disabled')){
 				filter.fadeOut('slow',function(){
@@ -245,14 +245,16 @@ $.fn.structFilter = function(param, args) {
 	},
 
 	addCondition: function(filter){
+		var that = this;
 		var f=$('<a class="chip" href="javascript:void(0)"><span>'+this._htmlFilter(filter)+'</span></a>')
 			.appendTo(this._filters)
 			.append(EvoUI.makeIcon('close', 'close'))
 			.data('filter', filter)
-			.fadeIn();
-		// if(this.options.highlight){
-		// 	f.effect('highlight');
-		// }
+			.fadeIn().on('click', '.close', function(e){
+				e.stopPropagation();
+				$(this).closest('.chip').remove();
+				that._triggerChange();
+			});
 		this._triggerChange();
 		if(this._bSubmit){
 			this._bSubmit.removeClass('state-active').show();
@@ -475,10 +477,10 @@ $.fn.structFilter = function(param, args) {
 					addOK=(fType==fTypes.list || fType==fTypes.listDropdown || fType==fTypes.bool);
 				}
 			}
-            if (addOK)
-                this._bAdd.removeClass('disable').show();
-            else
-                this._bAdd.addClass('disable').show();
+			if (addOK)
+				this._bAdd.removeClass('disable').show();
+			else
+				this._bAdd.addClass('disable').show();
 			this._step=3;
 		}
 	},
