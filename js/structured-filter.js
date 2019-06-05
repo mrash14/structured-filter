@@ -469,8 +469,8 @@ $.fn.structFilter = function(param, args) {
 							$value.val(v);
 							addOK=v!=='';
 							if(opBetween){
-								$value.next().next().val(v2);
-								addOK=v!=='' && v2!=='';
+								$value.closest('.evo-editFilter').find('#value2').val(v2);
+								addOK = v!=='' && v2!=='';
 							}
 					}
 				}else{
@@ -503,7 +503,7 @@ $.fn.structFilter = function(param, args) {
 			var vs = [],
 				ls = [],
 				values = v.find('select').val();
-			self._field.list.forEach(value => {
+			this._field.list.forEach(value => {
 				if (values.indexOf(value.id) > -1) {
 					vs.push(value.id);
 					ls.push(value.label);
@@ -557,7 +557,7 @@ $.fn.structFilter = function(param, args) {
 				}
 				fv.value=v.val();
 				if(opVal==evoAPI.sBetween || opVal==evoAPI.sNotBetween){
-					fv.label2=fv.value2=v.next().next().val();
+					fv.label2 = fv.value2 = v.closest('.evo-editFilter').find('#value2').val();
 				}
 			}
 		}
